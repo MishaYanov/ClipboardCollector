@@ -1,4 +1,4 @@
-export interface IRecord {
+export default interface IRecord {
     id: number;
     text: string;
     url: string;

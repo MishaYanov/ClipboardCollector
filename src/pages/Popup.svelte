@@ -1,10 +1,13 @@
 <script lang="ts">
+  import Navbar from "../components/Navbar.svelte";
+  import RecordList from "../components/RecordList.svelte";
   import type { IPopupMessage } from "../models/IPopupMessage";
+  import type IRecord from "../models/IRecord";
   import { PopupToBackGroundMessageType } from "../models/PopupToBackGroundMessageTypes";
   import { PortName } from "../models/PortName";
   import PortService from "../services/backgroundPortHandler";
 
-  let records: any[] | null = null;
+  let records: IRecord[] | null = null;
   const ps = new PortService(PortName.POPUP);
 
   const message: IPopupMessage = {
@@ -22,28 +25,10 @@
   });
 </script>
 
-<div>
-  {#if records === null}
-  <p>Loading records...</p>
-  {:else if records.length > 0}
-    <ul>
-      {#each records as record (record.id)}
-        <li>
-          <strong>ID:</strong>
-          {record.id} <br />
-          <strong>Text:</strong>
-          {record.text} <br />
-          <strong>URL:</strong>
-          <a href={record.url} target="_blank">{record.url}</a> <br />
-          <strong>Timestamp:</strong>
-          {new Date(record.timestamp).toLocaleString()}
-        </li>
-      {/each}
-    </ul>
-  {:else}
-    <p>No records found.</p>
-  {/if}
-</div>
+<main>
+  <Navbar />
+  <RecordList {records} />
+</main>
 
 <style>
   /* Your CSS styles */
