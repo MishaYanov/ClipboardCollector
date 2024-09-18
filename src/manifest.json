@@ -24,7 +24,7 @@
       "js": ["src/content-pages/copyListener.ts"]
     }
   ],
-  "permissions": ["storage", "activeTab", "clipboardWrite", "clipboardRead", "scripting"],
+  "permissions": ["storage", "activeTab", "clipboardWrite", "clipboardRead", "scripting", "tabs"],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'; style-src 'self' 'unsafe-inline';"
   }

@@ -1,13 +1,17 @@
 <script lang="ts">
-  import { onDestroy, onMount } from "svelte";
+  import { onDestroy, onMount, tick } from "svelte";
   import type IRecord from "../models/IRecord";
-  import MdiContentCopy from "./icons/MdiContentCopy.svelte";
   import Tooltip from "./Tooltip.svelte";
+  import MdiDeleteAlertOutline from "./icons/MdiDeleteAlertOutline.svelte";
+  import MdiClose from "./icons/MdiClose.svelte";
+  import MdiCheck from "./icons/MdiCheck.svelte";
+  import MdiContentCopy from "./icons/MdiContentCopy.svelte";
 
   export let record: IRecord;
 
   //text overflow state
-  let ref: any;
+  let textRef: any;
+  let recordRef: any;
   let isOverflowing = false;
   let observer;
   //tooltip state
@@ -16,11 +20,16 @@
   let tooltipPosition = { x: 0, y: 0 };
   // expanded state
   let isExpanded = false;
+  // edit state
+  let isEditing = false;
 
-  onMount(() => {
+  onMount(async () => {
+    await tick();
     observer = new ResizeObserver(checkTextWidth);
-    observer.observe(ref);
-    checkTextWidth();
+    if (textRef) {
+      observer.observe(textRef);
+      checkTextWidth();
+    }
     document.addEventListener("click", handleDocumentClick);
   });
 
@@ -29,7 +38,8 @@
   });
 
   function checkTextWidth() {
-    const width = ref.scrollWidth;
+    if (!textRef) return;
+    const width = textRef.scrollWidth;
     if (width > 200) {
       isOverflowing = true;
     } else {
@@ -42,39 +52,55 @@
   };
 
   const expandRecord = () => {
-    isExpanded = !isExpanded;
+    isExpanded = true;
     showTooltip = false;
   };
 
+  const minimize = () => {
+    isExpanded = false;
+  };
+
   function handleDocumentClick(event: MouseEvent) {
-    if (ref && !ref.contains(event.target as Node)) {
+    if (recordRef && !recordRef.contains(event.target as Node)) {
       isExpanded = false;
     }
   }
 
   function handleMouseEnter(event: MouseEvent) {
     hoverTimeout = setTimeout(() => {
-      const rect = ref.getBoundingClientRect();
+      const rect = textRef.getBoundingClientRect();
       tooltipPosition = {
         x: rect.left + window.scrollX,
-        y: rect.bottom + window.scrollY + 5, // Adjust vertical position as needed
+        y: rect.bottom + window.scrollY + 5,
       };
       showTooltip = true;
-    }, 1000); // 1 second delay
+    }, 1000);
   }
 
   function handleMouseLeave() {
     clearTimeout(hoverTimeout);
     showTooltip = false;
   }
+
+  const openLink = () => {
+    //TODO: highlight the text in the page
+    if (record.url) chrome.tabs.create({ url: record.url });
+  };
+
+  //TODO: add tooltip for the text
   const editText = () => {
+    isEditing = true;
     submitRecord();
   };
+
+  //TODO: add tooltip for the text
+  const deleteRecord = () => {};
+
+  //TODO: add tooltip for the text
   const submitRecord = () => {};
-  console.log(record);
 </script>
 
-<div class="copy-record" class:expanded={isExpanded}>
+<div class="copy-record" class:expanded={isExpanded} bind:this={recordRef}>
   <!-- svelte-ignore a11y-click-events-have-key-events a11y-missing-attribute a11y-no-static-element-interactions -->
   <a
     class="copy-record-text"
@@ -82,27 +108,57 @@
     on:mouseenter={handleMouseEnter}
     on:mouseleave={handleMouseLeave}
   >
-    <p bind:this={ref}>
-      {record.text}
-    </p>
-    {#if isOverflowing && !isExpanded}
-      <span> ...</span>
+
+    {#if !isEditing}
+      <p bind:this={textRef}>
+        {record.text}
+      </p>
+      {#if isOverflowing && !isExpanded}
+        <span> ...</span>
+      {/if}
+    {:else}
+      <textarea class="update-text" bind:value={record.text} />
     {/if}
-    {#if isExpanded}
-      <div class="action-bar-expanded">
-        <button on:click={editText}>Edit</button>
-        <div class="copy-record-actions-expanded">
-          <a class="copy-action" on:click={copyToClipboard}
+
+    {#if isExpanded && !isEditing}
+      {#if record.url}
+        <div class="link" on:click={openLink}>
+          <p>Open the copy location</p>
+        </div>
+      {/if}
+
+      {#if isEditing}
+        <div class="action-bar-expanded">
+          <a class="action">
+            <MdiCheck class="icon" />
+          </a>
+          <a class="action">
+            <MdiClose class="icon" />
+          </a>
+        </div>
+      {:else}
+        <div class="action-bar-expanded">
+          <!-- <a class="action" on:click={editText}>
+            <MdiCommentEditOutline class="icon" />
+          </a> -->
+          <a class="action" on:click={copyToClipboard}
             ><MdiContentCopy class="icon" /></a
           >
+          <a class="action" on:click={deleteRecord}>
+            <MdiDeleteAlertOutline class="icon" />
+          </a>
+          <a class="action" on:click={minimize}>
+            <MdiClose class="icon" />
+          </a>
         </div>
-      </div>
+      {/if}
+
     {/if}
   </a>
   <!-- svelte-ignore a11y-click-events-have-key-events a11y-missing-attribute a11y-no-static-element-interactions -->
   {#if !isExpanded}
     <div class="copy-record-actions">
-      <a class="copy-action" on:click={copyToClipboard}
+      <a class="action" on:click={copyToClipboard}
         ><MdiContentCopy class="icon" /></a
       >
     </div>
@@ -133,7 +189,7 @@
     align-items: center;
     justify-content: center;
   }
-  .copy-action:hover {
+  .action:hover {
     color: #1d4cb1;
   }
   p {
@@ -148,6 +204,7 @@
   }
   .expanded {
     min-height: 100px !important;
+    height: fit-content !important;
     border-color: green;
     width: 280px;
   }
@@ -158,12 +215,13 @@
     height: fit-content;
     width: 100%;
     flex-direction: column;
+
+    cursor: default;
   }
   .expanded p {
     max-width: 100%;
     white-space: normal;
     height: fit-content;
-    max-height: 250px;
     min-height: 40px;
     padding: 0 10px;
     overflow-y: scroll;
@@ -172,7 +230,7 @@
     display: none;
   }
   .action-bar-expanded {
-    height: 60px;
+    height: 3 0px;
     width: 100%;
     display: flex;
     flex-direction: row;
@@ -181,7 +239,20 @@
     gap: 10px;
     padding: 0 10px;
   }
-  .copy-record-actions-expanded {
-  
+  .link {
+    color: white;
+    cursor: pointer;
+    height: 24px;
+    margin-top: 5px;
+  }
+  .link:hover {
+    color: #1d4cb1;
+  }
+  .update-text {
+    white-space: normal;
+    padding: 0 10px;
+    width: 100%;
+    height: 250px;
+    resize: none;
   }
 </style>
