@@ -17,3 +17,19 @@ code {
   background-color: #ffffff24;
   border-radius: 2px;
 }
+
+.icon{
+  width: 20px;
+  height: 20px;
+  margin-right: 5px;
+  cursor: pointer;
+}
+
+/* Hide scrollbars for all elements */
+* {
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
+
+*::-webkit-scrollbar {
+  display: none; 
+}
