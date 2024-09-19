@@ -1,3 +1,4 @@
+import type { ICollection } from "./ICollection";
 import type { PopupToBackGroundMessageType } from "./PopupToBackGroundMessageTypes";
 
 export interface IPopupMessage {
@@ -5,4 +6,5 @@ export interface IPopupMessage {
     key?: string;
     value?: any;
     payload?: any;
+    collections?: ICollection[];
 }

@@ -33,3 +33,7 @@ code {
 *::-webkit-scrollbar {
   display: none; 
 }
+
+.action:hover {
+  color: #1d4cb1;
+}

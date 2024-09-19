@@ -187,9 +187,6 @@
     align-items: center;
     justify-content: center;
   }
-  .action:hover {
-    color: #1d4cb1;
-  }
   p {
     margin: 0;
     padding: 0;

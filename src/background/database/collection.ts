@@ -157,12 +157,23 @@ export async function deleteCollectionRecord(id: string): Promise<void> {
   });
 }
 
-export async function setActiveCollectionId(collectionId: string): Promise<void> {
+export async function setActiveCollectionId(collectionId: string | null): Promise<void> {
   const db = await openDatabase();
   return new Promise((resolve, reject) => {
     const transaction = db.transaction('settings', 'readwrite');
     const store = transaction.objectStore('settings');
-
+    if (collectionId === null) {
+      //delete active collection id
+      const request = store.delete('activeCollectionId');
+      request.onsuccess = () => {
+        resolve();
+      };
+      request.onerror = () => {
+        console.error('Failed to delete active collection id:', request.error);
+        reject(request.error);
+      };
+      return;
+    }
     const request = store.put({ key: 'activeCollectionId', value: collectionId });
 
     request.onsuccess = () => {

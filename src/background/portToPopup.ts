@@ -1,7 +1,7 @@
 import type { IPopupMessage } from "../models";
 import { PopupToBackGroundMessageType } from "../models/PopupToBackGroundMessageTypes";
 import { PortName } from "../models/PortName";
-import { getLast100Records, addCollection, deleteCollection, addCollectionRecord, getCollectionRecords, deleteCollectionRecord, getCollections } from "./database";
+import { getLast100Records, addCollection, deleteCollection, addCollectionRecord, getCollectionRecords, deleteCollectionRecord, getCollections, setActiveCollectionId, getActiveCollectionId } from "./database";
 
 class PortToPopup {
   private static instance: PortToPopup;
@@ -70,6 +70,11 @@ class PortToPopup {
       case PopupToBackGroundMessageType.DELETE_COLLECTION:
         const collectionId = message.payload.collectionId;
         deleteCollection(collectionId).then(() => {
+          getActiveCollectionId().then((activeCollectionId) => {
+            if (activeCollectionId === collectionId) {
+              setActiveCollectionId(null);
+            }
+          });
           this.getAllCollections();
         }).catch((error) => {
            // TODO: pass error to client
@@ -77,7 +82,7 @@ class PortToPopup {
         });
         break;
       case PopupToBackGroundMessageType.ADD_COLLECTION_RECORD:
-        const collectionRecord = message.payload.collectionRecord;
+        const collectionRecord = message.payload;
         addCollectionRecord(
           collectionRecord.collectionId,
           collectionRecord.text,
@@ -86,11 +91,14 @@ class PortToPopup {
           collectionRecord.shortcut
         ).then(() => {
           this.port.postMessage({
-            type: PopupToBackGroundMessageType.GET_COLLECTION_RECORDS,
-            collectionId: collectionRecord.collectionId,
+            type: PopupToBackGroundMessageType.COLLECTION_RECORD_ADDED,
+            payload:{collectionId: collectionRecord.collectionId},
           });
         }).catch((error) => {
-           // TODO: pass error to client
+          this.port.postMessage({
+            type: PopupToBackGroundMessageType.ERROR,
+            payload: error,
+          });
           console.error("Failed to add collection record:", error);
         });
         break;
@@ -107,13 +115,32 @@ class PortToPopup {
         });
         break;
       case PopupToBackGroundMessageType.SET_ACTIVE_COLLECTION:
+        const collectionIdToActivate = message.payload.id;
+        setActiveCollectionId(collectionIdToActivate).then(() => {
+          this.getActiveCollection();
+        }).catch((error) => {
+          console.error("Failed to set active collection:", error);
+        });
         break;
       case PopupToBackGroundMessageType.GET_ACTIVE_COLLECTION:
+        this.getActiveCollection();
         break;
-
       default:
         break;
     }
+  }
+
+  private getActiveCollection() {
+    getActiveCollectionId().then((activeCollectionId) => {
+      this.port.postMessage({
+        type: PopupToBackGroundMessageType.GET_ACTIVE_COLLECTION,
+        payload: {
+          id: activeCollectionId,
+        },
+      });
+    }).catch((error) => {
+      console.error("Failed to get active collection:", error);
+    });
   }
 
   private getAllCollectionRecords(message: IPopupMessage) {
@@ -121,7 +148,10 @@ class PortToPopup {
     getCollectionRecords(collectionRecordsId).then((collectionRecords) => {
       this.port.postMessage({
         type: PopupToBackGroundMessageType.GET_COLLECTION_RECORDS,
-        collectionRecords,
+        payload: {
+          collectionRecords,
+          collectionId: collectionRecordsId,
+        },
       });
     }).catch((error) => {
       console.error("Failed to get collection records:", error);
