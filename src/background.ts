@@ -1,5 +1,15 @@
-import { addCopyRecord, getLast100Records } from "./background/database";
+import { createActiveCollectionContextMenuParent } from "./background/activeCollectionContextMenu";
+import {
+  createClipboardChildMenus,
+  createClipboardContextMenuParent,
+} from "./background/clipboardContextMenu";
+import {
+  addCopyRecord,
+  getActiveCollectionId,
+  getLast100Records,
+} from "./background/database";
 import PortToPopup from "./background/portToPopup";
+import { clipboardWrite, decodeId, sanitizeId } from "./background/utils";
 
 // USE THIS TO PURGE THE DATABASE
 // clearAllData()
@@ -8,104 +18,43 @@ chrome.runtime.onInstalled.addListener((details) => {
   console.log("Extension installed:", details);
   chrome.runtime.onMessage.addListener(
     async (message, sender, sendResponse) => {
-      debugger
+      debugger;
       if (message.type === "copy") {
         await addCopyRecord(message.text, message.url, message.timestamp);
-        createChildMenus();
+        createClipboardChildMenus();
         sendResponse({ status: "recorded" });
       }
     }
   );
 
-  chrome.contextMenus.create(
-    {
-      id: "contextMenuManager",
-      title: "Clipboard Manager",
-      contexts: ["all"]
-    },
-    () => {
-      if (chrome.runtime.lastError) {
-        console.error("Error creating context menu:", chrome.runtime.lastError);
-      } else {
-        console.log("Clipboard Manager context menu created successfully.");
-        createChildMenus();
-      }
+  const bp = PortToPopup.getInstance();
+
+  chrome.runtime.onConnect.addListener((port) => {
+    bp.connect(port);
+  });
+
+  createClipboardContextMenuParent();
+
+  //get active collection -> if exists, get all records -> create collection context menu
+  getActiveCollectionId().then((activeCollectionId) => {
+    if (activeCollectionId) {
+      createActiveCollectionContextMenuParent();
     }
-  );
-});
-
-const bp = PortToPopup.getInstance();
-
-chrome.runtime.onConnect.addListener((port) => {
-  bp.connect(port);
-});
-
-async function createChildMenus() {
-  const options = await getRecords();
-
-  if (options.length === 0) {
-    options.push("No recent clipboard history");
-  }
-  options.forEach((option) => {
-    chrome.contextMenus.create(
-      {
-        id: `clipboardContextMenu-${sanitizeId(option)}`, 
-        parentId: "contextMenuManager", 
-        title: option, 
-        contexts: ["all"]
-      },
-      () => {
-        if (chrome.runtime.lastError) {
-          console.error(`Error creating child context menu '${option}':`, chrome.runtime.lastError);
-        } else {
-          console.log(`Child context menu '${option}' created successfully.`);
-        }
-      }
-    );
   });
-}
-
-function sanitizeId(option: string): string {
-  return option.replace(/\s+/g, '-').toLowerCase().substring(0, 100);
-}
-
-async function getRecords(): Promise<string[]> {
-  const records = await getLast100Records(10);
-  const options: string[] = [];
-  records.forEach((record: any) => {
-    options.push(record.text);
-  });
-  return options;
-}
-
-async function clipboardWrite(text: string) {
-  try {
-    await navigator.clipboard.writeText(text);
-    console.log("Text written to clipboard:", text);
-  } catch (error) {
-    console.error("Failed to write to clipboard:", error);
-  }
-
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (tab.id) {
-    chrome.tabs.sendMessage(tab.id, { type: "PASTE_TEXT", payload: { text } }, (response) => {
-      if (chrome.runtime.lastError) {
-        console.error("Error sending message to content script:", chrome.runtime.lastError);
-      } else {
-        console.log("Pasted text into the page:", response?.status);
-      }
-    });
-  }
-}
+});
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
-  if (typeof info.menuItemId === 'string' && info.menuItemId.startsWith("clipboardContextMenu-")) {
-    const sanitizedText = info.menuItemId.replace("clipboardContextMenu-", "");
+  if (
+    typeof info.menuItemId === "string" &&
+    (info.menuItemId.startsWith("clipboardContextMenu-") ||
+      info.menuItemId.startsWith("activeCollectionContextMenu-"))
+  ) {
+    const sanitizedText = info.menuItemId.startsWith(
+      "activeCollectionContextMenu-"
+    )
+      ? info.menuItemId.replace("activeCollectionContextMenu-", "")
+      : info.menuItemId.replace("clipboardContextMenu-", "");
     const text = decodeId(sanitizedText);
     clipboardWrite(text);
   }
 });
-
-function decodeId(id: string): string {
-  return id.replace(/-/g, ' ');
-}

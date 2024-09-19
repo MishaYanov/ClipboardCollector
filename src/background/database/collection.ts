@@ -1,5 +1,6 @@
 import type { ICollection, ICollectionRecord } from '../../models';
 import { generateUUID } from '../../utils';
+import { createActiveCollectionContextMenuParent, removeActiveCollectionContextMenuParent } from '../activeCollectionContextMenu';
 import { openDatabase } from './';
 
 
@@ -166,6 +167,8 @@ export async function setActiveCollectionId(collectionId: string | null): Promis
       //delete active collection id
       const request = store.delete('activeCollectionId');
       request.onsuccess = () => {
+        // TODO: find a better place to put this
+        removeActiveCollectionContextMenuParent();
         resolve();
       };
       request.onerror = () => {
@@ -177,6 +180,7 @@ export async function setActiveCollectionId(collectionId: string | null): Promis
     const request = store.put({ key: 'activeCollectionId', value: collectionId });
 
     request.onsuccess = () => {
+      createActiveCollectionContextMenuParent();
       resolve();
     };
 
