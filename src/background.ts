@@ -1,5 +1,4 @@
-import browser from "webextension-polyfill";
-import { addCopyRecord, getLast100Records } from "./background/database";
+import { addCopyRecord } from "./background/database";
 import PortToPopup from "./background/portToPopup";
 
 
@@ -7,7 +6,7 @@ import PortToPopup from "./background/portToPopup";
 // clearAllData()
 
 
-browser.runtime.onInstalled.addListener((details) => {
+chrome.runtime.onInstalled.addListener((details) => {
   console.log("Extension installed:", details);
   // this is from the content script
   // TODO: add types and listeners for content script messages

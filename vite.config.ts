@@ -1,7 +1,6 @@
-import { defineConfig } from "vite";
+import { defineConfig } from 'vite';
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import webExtension, { readJsonFile } from "vite-plugin-web-extension";
-import Icons from 'unplugin-icons/vite';
 
 
 function generateManifest() {
@@ -22,9 +21,6 @@ export default defineConfig({
     webExtension({
       manifest: generateManifest,
       watchFilePaths: ["package.json", "manifest.json"],
-    }),
-    Icons({
-      compiler: 'svelte',
     }),
   ],
 });
