@@ -39,8 +39,8 @@ export async function deleteCopyRecord(id: string): Promise<void> {
     console.error("Transaction failed:", transaction.error);
   };
 }
-
-export async function getLast100Records(): Promise<IRecord[]> {
+//TODO: rename this function to getRecords
+export async function getLast100Records(limit: number = 100): Promise<IRecord[]> {
   const db = await openDatabase();
   return new Promise((resolve, reject) => {
     const transaction = db.transaction("copyHistory", "readonly");
@@ -52,7 +52,7 @@ export async function getLast100Records(): Promise<IRecord[]> {
 
     request.onsuccess = () => {
       const cursor = request.result;
-      if (cursor && records.length < 100) {
+      if (cursor && records.length < limit) {
         records.push(cursor.value as IRecord);
         cursor.continue();
       } else {

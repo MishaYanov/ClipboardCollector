@@ -108,7 +108,9 @@
   const deleteAndRefetch = (event:any) => {
     ps.sendMessage({
       type: PopupToBackGroundMessageType.DELETE_COLLECTION_RECORD,
-      payload: { recordId: event.detail.recordId },
+      payload: {
+        collectionRecordId: event.detail.recordId 
+      },
     });
     getCollectionRecords();
   };
