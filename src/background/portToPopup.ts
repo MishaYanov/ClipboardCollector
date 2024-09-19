@@ -1,3 +1,4 @@
+import type { IPopupMessage } from "../models/IPopupMessage";
 import { PopupToBackGroundMessageType } from "../models/PopupToBackGroundMessageTypes";
 import { PortName } from "../models/PortName";
 import { getLast100Records } from "./database";
@@ -47,6 +48,27 @@ class PortToPopup {
   public close() {
     this.port.disconnect();
   }
+
+  private onMessageListener(message : IPopupMessage){
+    switch (message.type) {
+      //clipboard
+      case PopupToBackGroundMessageType.GREET:
+        getLast100Records().then((records) => {
+          this.port.postMessage({
+            type: PopupToBackGroundMessageType.GET_ALL,
+            records,
+          });
+        });
+        break;
+        
+      // collections
+      case PopupToBackGroundMessageType.GET_ALL_COLLECTIONS:
+        break;
+      default:
+        break;
+    }
+  }
 }
+
 
 export default PortToPopup;

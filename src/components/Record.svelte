@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount, tick } from "svelte";
-  import type IRecord from "../models/IRecord";
+  import type { IRecord } from "../models/";
   import Tooltip from "./Tooltip.svelte";
   import MdiDeleteAlertOutline from "./icons/MdiDeleteAlertOutline.svelte";
   import MdiClose from "./icons/MdiClose.svelte";
@@ -108,7 +108,6 @@
     on:mouseenter={handleMouseEnter}
     on:mouseleave={handleMouseLeave}
   >
-
     {#if !isEditing}
       <p bind:this={textRef}>
         {record.text}
@@ -152,7 +151,6 @@
           </a>
         </div>
       {/if}
-
     {/if}
   </a>
   <!-- svelte-ignore a11y-click-events-have-key-events a11y-missing-attribute a11y-no-static-element-interactions -->

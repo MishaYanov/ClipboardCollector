@@ -1,6 +1,6 @@
-export default interface IRecord {
-    id: number;
+export interface IRecord {
+    id: string;
     text: string;
     url: string;
-    timestamp: Date;
+    timestamp: string;
 }

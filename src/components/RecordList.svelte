@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { IPopupMessage } from "../models/IPopupMessage";
-  import type IRecord from "../models/IRecord";
+  import type { IRecord } from "../models/";
   import { PopupToBackGroundMessageType } from "../models/PopupToBackGroundMessageTypes";
   import { PortName } from "../models/PortName";
   import PortService from "../services/backgroundPortHandler";
