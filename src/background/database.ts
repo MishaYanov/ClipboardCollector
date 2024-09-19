@@ -69,6 +69,22 @@ function maintainRecordLimit(db: IDBDatabase) {
   };
 }
 
+export async function deleteCopyRecord(id: number) {
+  const db = await openDatabase();
+  const transaction = db.transaction("copyHistory", "readwrite");
+  const store = transaction.objectStore("copyHistory");
+
+  store.delete(id);
+
+  transaction.oncomplete = () => {
+    console.log("Record deleted");
+  };
+
+  transaction.onerror = () => {
+    console.error("Transaction failed:", transaction.error);
+  };
+}
+
 export async function getLast100Records(): Promise<any[]> {
   const db = await openDatabase();
   return new Promise((resolve, reject) => {

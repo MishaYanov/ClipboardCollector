@@ -4,5 +4,7 @@ export enum PopupToBackGroundMessageType {
     SET = 'SET',
     DELETE = 'DELETE',
     CLEAR = 'CLEAR',
-    GREET = 'GREET'
+    GREET = 'GREET',
+    GET_ALL_COLLECTIONS = 'GET_ALL_COLLECTIONS',
+    GET_COLLECTION_DATA = 'GET_COLLECTION_DATA',
 }

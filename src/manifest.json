@@ -26,6 +26,6 @@
   ],
   "permissions": ["storage", "activeTab", "clipboardWrite", "clipboardRead", "scripting", "tabs"],
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'; style-src 'self' 'unsafe-inline';"
+    "extension_pages": "default-src 'self'; style-src 'self' 'unsafe-inline' http://localhost:5173;"
   }
 }
