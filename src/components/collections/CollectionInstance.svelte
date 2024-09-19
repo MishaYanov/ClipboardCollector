@@ -8,6 +8,7 @@
     type ICollectionRecord,
   } from "../../models";
   import NewCollectionRecord from "./NewCollectionRecord.svelte";
+  import CollectionRecord from "./CollectionRecord.svelte";
 
   // Props
   export let collection: ICollection;
@@ -35,7 +36,7 @@
   const handleMessages = (message: any) => {
     switch (message.type) {
       case PopupToBackGroundMessageType.GET_COLLECTION_RECORDS:
-        debugger
+        debugger;
         if (message.payload?.collectionId === collection.id) {
           records = message.payload.collectionRecords;
           loadingRecords = false;
@@ -104,15 +105,21 @@
     returnToCollectionList();
   };
 
-  // Handle returning to the collection list
+  const deleteAndRefetch = (event:any) => {
+    ps.sendMessage({
+      type: PopupToBackGroundMessageType.DELETE_COLLECTION_RECORD,
+      payload: { recordId: event.detail.recordId },
+    });
+    getCollectionRecords();
+  };
+
+
   const returnToCollectionList = () => {
     dispatch("close");
   };
 
-  // Handle events from AddRecord
   const handleRecordAdded = () => {
     showingAddRecordForm = false;
-    // The background script sends a COLLECTION_RECORD_ADDED message, which refreshes the records
   };
 
   const handleCancelAddRecord = () => {
@@ -122,18 +129,20 @@
 
 <section class="collection-instance">
   <div class="collection-data">
-    <h2>{collection.name}</h2>
-    <p>Created at: {new Date(collection.timestamp).toLocaleString()}</p>
+    <div class="header">
+      <h2>{collection.name}</h2>
+      <span>{new Date(collection.timestamp).toDateString()}</span>
+    </div>
     {#if isActive}
       <p class="active-label">This collection is currently active.</p>
     {/if}
   </div>
 
   <div class="collection-actions">
-    <button on:click={addNewRecord}>Create New Collection Record</button>
-    <button on:click={setActive}>Set as Active Collection</button>
-    <button on:click={deleteCollection}>Delete Collection</button>
-    <button on:click={returnToCollectionList}>Back to Collection List</button>
+    <button class="main" on:click={addNewRecord}>New Record</button>
+    <button class="main" on:click={setActive}>Set Active</button>
+    <button class="secondary" on:click={deleteCollection}>Delete</button>
+    <button class="secondary" on:click={returnToCollectionList}>Return</button>
   </div>
 
   {#if showingAddRecordForm}
@@ -150,26 +159,12 @@
     {#if loadingRecords || records === null}
       <p>Loading records...</p>
     {:else if records.length > 0}
-      <ul>
-        {#each records as record}
-          <li>
-            <div class="record-text">{record.text}</div>
-            {#if record.url}
-              <div class="record-url">
-                <a href={record.url} target="_blank" rel="noopener noreferrer">
-                  {record.url}
-                </a>
-              </div>
-            {/if}
-            {#if record.shortcut}
-              <div class="record-shortcut">{record.shortcut}</div>
-            {/if}
-            <div class="record-timestamp">
-              {new Date(record.timestamp).toLocaleString()}
-            </div>
-          </li>
-        {/each}
-      </ul>
+      {#each records as record}
+        <CollectionRecord 
+        {record} 
+        on:delete={deleteAndRefetch}
+        />
+      {/each}
     {:else}
       <p>No records in this collection.</p>
     {/if}
@@ -180,35 +175,28 @@
   .collection-instance {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    padding: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 8px;
+    padding: 5px;
   }
-
-  .collection-data h2 {
-    margin: 0 0 0.5rem 0;
+  .header {
+    display: flex;
+    gap: 0.5rem;
+    align-items: end;
+    height: 30px;
+    margin-bottom: 10px;
   }
-
+  h2 {
+    margin: 0;
+    padding: 0;
+  }
   .active-label {
     color: green;
     font-weight: bold;
   }
 
   .collection-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .collection-actions button {
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    border: none;
-    border-radius: 4px;
-    background-color: #2c58e9;
-    color: white;
-    transition: background-color 0.2s;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.3rem;
   }
 
   .collection-actions button:hover {
@@ -216,7 +204,7 @@
   }
 
   .collection-record-list {
-    margin-top: 1rem;
+    margin-top: 0.5rem;
   }
 
   .collection-record-list ul {

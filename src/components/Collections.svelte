@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import { PopupToBackGroundMessageType } from "../models/PopupToBackGroundMessageTypes";
   import { PortName } from "../models/PortName";
   import PortService from "../services/backgroundPortHandler";
@@ -8,23 +8,18 @@
   import type { ICollection, IPopupMessage } from "../models";
   import MdiClose from "./icons/MdiClose.svelte";
 
-  type Tab = "active" | "new" | "all";
+  export let activeTab: string;
 
   let ps: PortService;
   let collections: ICollection[] | null = null;
   // collection manager state
-  let activeTab: Tab = "all";
+
   let activeCollection: ICollection | null = null;
   let chosenCollection: ICollection | null = null;
   let isCreatingCollection = false;
 
   onMount(() => {
     ps = PortService.getInstance(PortName.POPUP);
-    //requests for background data
-    ps.sendMessage({ type: PopupToBackGroundMessageType.GET_ALL_COLLECTIONS });
-    ps.sendMessage({
-      type: PopupToBackGroundMessageType.GET_ACTIVE_COLLECTION,
-    });
     // listen for messages from background
     ps.onMessage((message: IPopupMessage) => {
       if (message.type === PopupToBackGroundMessageType.GET_ALL_COLLECTIONS) {
@@ -40,6 +35,15 @@
       }
     });
   });
+
+  $: if (activeTab === "collections") {
+    ps.sendMessage({ type: PopupToBackGroundMessageType.GET_ALL_COLLECTIONS });
+    ps.sendMessage({
+      type: PopupToBackGroundMessageType.GET_ACTIVE_COLLECTION,
+    });
+  } else {
+    handleClose();
+  }
 
   //create new collection
   const createCollection = () => {
@@ -78,11 +82,6 @@
   const handleActiveCollectionSet = (collection: ICollection) => {
     setActiveCollection(collection);
   };
-
-  function handleTabChange(event: CustomEvent<Tab>) {
-    const tab = event.detail;
-    activeTab = tab;
-  }
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -113,14 +112,16 @@
         {#if collections === null}
           <p>Loading collections...</p>
         {:else if collections.length > 0}
+          <h2>All collections</h2>
           {#each collections as collection (collection.id)}
-            <li
+            <div
+              class="collection-item"
               on:click={() => {
                 openCollection(collection);
               }}
             >
               {collection.name}
-            </li>
+            </div>
           {/each}
         {:else}
           <p>No collections found.</p>
@@ -129,9 +130,7 @@
     {:else if chosenCollection}
       <CollectionInstance
         collection={chosenCollection}
-        isActive={() => {
-          return activeCollection?.id === chosenCollection?.id;
-        }}
+        isActive={activeCollection?.id === chosenCollection?.id}
         on:close={handleClose}
         on:setActive={setActiveCollection(chosenCollection)}
       />
@@ -144,27 +143,20 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    padding: 10px;
     height: 500px;
-    width: 280px;
+    width: 300px;
     overflow-y: scroll;
   }
-  .collection-list {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    padding: 5px;
-  }
-  ul {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    width: 300px;
-    padding: 5px;
-    justify-content: space-around;
-  }
+
   ul.inner-tab-list {
+    display: flex;
+    padding: 5px;
+    width: 300px;
+    gap: 5px;
     flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: #2c58e9 solid 2px;
   }
   li {
     width: 140px;
@@ -175,6 +167,23 @@
     cursor: pointer;
     font-size: 1rem;
     white-space: nowrap;
+  }
+  .collection-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .collection-item {
+    height: 40px;
+    width: 280px;
+    font-family: Arial, sans-serif;
+    border-left: 2px solid #2c58e9;
+    display: flex;
+    font-size: 1rem;
+    align-items: center;
+    padding: 5px;
+    cursor: pointer;
+    margin-left: 3px;
   }
   li:hover {
     color: #2c58e9;
@@ -189,8 +198,5 @@
   .active-collection-shortcut span {
     color: green;
     font-weight: 700;
-  }
-  .active {
-    color: green;
   }
 </style>

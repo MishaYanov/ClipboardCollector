@@ -7,15 +7,20 @@
   import Record from "./Record.svelte";
 
   export let records: IRecord[] | null = null;
+  export let activeTab: string;
 
   const ps = PortService.getInstance(PortName.POPUP);
+
 
   const message: IPopupMessage = {
     type: PopupToBackGroundMessageType.GREET,
     payload: "Hello from the popup!",
   };
-
-  ps.sendMessage(message);
+  
+  $: if (activeTab === "clipboard") {
+    ps.sendMessage(message);
+  }
+ 
 
   ps.onMessage((message) => {
     if (message.type === PopupToBackGroundMessageType.GET_ALL) {
@@ -23,6 +28,7 @@
       records = message.records;
     }
   });
+
 </script>
 
 <section class="record-list">

@@ -17,10 +17,10 @@
   <Navbar {activeTab} on:tabChange={handleTabChange} />
   <div class="tab-content">
     <div class:active={activeTab === "clipboard"}>
-      <RecordList />
+      <RecordList activeTab={activeTab}/>
     </div>
     <div class:active={activeTab === "collections"}>
-      <Collections />
+      <Collections activeTab={activeTab}/>
     </div>
   </div>
 </main>

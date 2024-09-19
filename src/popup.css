@@ -37,3 +37,29 @@ code {
 .action:hover {
   color: #1d4cb1;
 }
+
+button.main{
+  background-color: #1d4cb1;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button.main:hover{
+  background-color: #1d4cb1;
+}
+
+button.secondary{
+  background-color: #ffffff24;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button.secondary:hover{
+  background-color: #ffffff44;
+}
