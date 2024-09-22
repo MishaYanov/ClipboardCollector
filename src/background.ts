@@ -1,11 +1,9 @@
 import { createActiveCollectionContextMenuParent } from "./background/activeCollectionContextMenu";
 import {
-  createClipboardChildMenus,
   createClipboardContextMenuParent,
 } from "./background/clipboardContextMenu";
 import {
   addCopyRecord,
-  getActiveCollectionId,
 } from "./background/database";
 import PortToPopup from "./background/portToPopup";
 import { clipboardWrite, decodeId } from "./background/utils";
@@ -13,6 +11,8 @@ import { PortName } from "./models";
 
 // USE THIS TO PURGE THE DATABASE
 // clearAllData()
+
+
 const bp = PortToPopup.getInstance();
 
 chrome.runtime.onConnect.addListener((port) => {

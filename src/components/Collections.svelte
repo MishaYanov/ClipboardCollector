@@ -177,7 +177,7 @@
     height: 40px;
     width: 280px;
     font-family: Arial, sans-serif;
-    border-left: 2px solid #2c58e9;
+    border-left: 1px solid var(--electric-blue);
     display: flex;
     font-size: 1rem;
     align-items: center;

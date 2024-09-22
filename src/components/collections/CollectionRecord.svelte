@@ -17,6 +17,7 @@
   let recordRef: HTMLElement;
   let isOverflowing = false;
   let observer: ResizeObserver;
+  const fullText = record.text;
 
   // Tooltip state
   let showTooltip = false;
@@ -81,7 +82,7 @@
 
   // Copy to clipboard
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(record.text);
+    navigator.clipboard.writeText(fullText);
   };
 
   // Delete record
@@ -164,10 +165,10 @@
 
 <style>
   .record-item {
-    height: 80px;
+    height: 60px;
     width: 280px;
     font-family: Arial, sans-serif;
-    border-left: 2px solid #2c58e9;
+    border-left: 1px solid var(--electric-blue);
     display: flex;
     padding: 5px;
     position: relative;
@@ -200,7 +201,7 @@
   }
   .data-text {
     max-width: 200px;
-    white-space: default;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     font-size: 16px;
