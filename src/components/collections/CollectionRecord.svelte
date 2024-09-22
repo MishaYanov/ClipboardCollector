@@ -164,7 +164,7 @@
 
 <style>
   .record-item {
-    height: 60px;
+    height: 80px;
     width: 280px;
     font-family: Arial, sans-serif;
     border-left: 2px solid #2c58e9;
@@ -200,9 +200,10 @@
   }
   .data-text {
     max-width: 200px;
-    white-space: nowrap;
+    white-space: default;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-size: 16px;
   }
   .record-item.expanded .data-text, .record-item.expanded .data-item {
     max-width: 100%;
@@ -217,13 +218,6 @@
     width: 20%;
     margin-top: 5px;
     gap: 10px;
-  }
-  .action {
-    cursor: pointer;
-    color: #2c58e9;
-  }
-  .action:hover {
-    color: #1a3fbf;
   }
   /* Expanded styles */
   .record-item.expanded {
@@ -243,10 +237,5 @@
   .record-item.expanded .record-actions {
     height: auto;
     width: 100%;
-  }
-  .record-item.expanded textarea {
-    width: 100%;
-    height: 100px;
-    resize: vertical;
   }
 </style>

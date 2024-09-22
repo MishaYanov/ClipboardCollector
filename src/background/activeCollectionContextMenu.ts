@@ -7,6 +7,7 @@ export async function createActiveCollectionContextMenuParent(){
     // verify active collection exists
     const activeCollectionId = await getActiveCollectionId();
     if (!activeCollectionId) return;
+    removeActiveCollectionContextMenuParent();
     chrome.contextMenus.create(
       {
         id: "contextMenuManagerActiveCollection",
@@ -24,7 +25,7 @@ export async function createActiveCollectionContextMenuParent(){
     );
   }
 
-  export async function createActiveCollectionChildMenus(activeCollectionId: string) {
+  async function createActiveCollectionChildMenus(activeCollectionId: string) {
     const options: string[] = [];
     const records = await getCollectionRecords(activeCollectionId);
     records.forEach((record: any) => {
@@ -32,7 +33,7 @@ export async function createActiveCollectionContextMenuParent(){
     });
     
     if (options.length === 0) {
-      options.push("No recent clipboard history");
+      options.push("No records found");
     }
     options.forEach((option) => {
       chrome.contextMenus.create(

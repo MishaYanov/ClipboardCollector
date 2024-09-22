@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
+  import icon from "../../public/icon.png";
 
   const dispatch = createEventDispatcher();
 
@@ -8,7 +9,7 @@
 </script>
 
 <nav>
-  <img src="" alt="Logo" />
+  <img class="logo" src={icon} alt="Logo" />
   <!-- svelte-ignore a11y-click-events-have-key-events -->
   <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
   <ul>
@@ -29,12 +30,17 @@
 </nav>
 
 <style>
+  .logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
   nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: rgba(51, 51, 51, 0.5);
-    color: white;
+    background-color: #2f4f4fb9;
+    color: var(--cool-white);
     height: 80px;
     width:280px;
     padding: 0 10px;
@@ -60,10 +66,10 @@
   }
 
   li:hover {
-    color: #2c58e9;
+    color: var(--cyber-lime);
   }
 
   .active {
-    color: green;
+    color: var(--neon-green);
   }
 </style>

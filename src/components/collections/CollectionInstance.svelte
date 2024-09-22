@@ -36,7 +36,6 @@
   const handleMessages = (message: any) => {
     switch (message.type) {
       case PopupToBackGroundMessageType.GET_COLLECTION_RECORDS:
-        debugger;
         if (message.payload?.collectionId === collection.id) {
           records = message.payload.collectionRecords;
           loadingRecords = false;
@@ -144,7 +143,7 @@
     <button class="main" on:click={addNewRecord}>New Record</button>
     <button class="main" on:click={setActive}>Set Active</button>
     <button class="secondary" on:click={deleteCollection}>Delete</button>
-    <button class="secondary" on:click={returnToCollectionList}>Return</button>
+    <button class="secondary" on:click={returnToCollectionList}>Back</button>
   </div>
 
   {#if showingAddRecordForm}
@@ -191,7 +190,7 @@
     padding: 0;
   }
   .active-label {
-    color: green;
+    color: var(--neon-green);
     font-weight: bold;
   }
 
@@ -202,44 +201,10 @@
   }
 
   .collection-actions button:hover {
-    background-color: #1a3fbf;
+    background-color: var(--deep-space-blue);
   }
 
   .collection-record-list {
     margin-top: 0.5rem;
-  }
-
-  .collection-record-list ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .collection-record-list li {
-    padding: 0.5rem;
-    border-bottom: 1px solid #eee;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  .collection-record-list .record-text {
-    font-size: 1rem;
-    font-weight: bold;
-  }
-
-  .collection-record-list .record-url a {
-    color: #2c58e9;
-    text-decoration: none;
-  }
-
-  .collection-record-list .record-shortcut {
-    font-size: 0.9rem;
-    color: #555;
-  }
-
-  .collection-record-list .record-timestamp {
-    font-size: 0.8rem;
-    color: #999;
   }
 </style>

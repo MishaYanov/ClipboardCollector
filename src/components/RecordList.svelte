@@ -50,6 +50,6 @@
     align-items: center;
     justify-content: center;
     width: 290px;
-    gap: 3px;
   }
+ 
 </style>

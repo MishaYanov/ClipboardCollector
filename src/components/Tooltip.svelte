@@ -21,8 +21,7 @@
       background-color: #333;
       color: #fff;
       padding: 5px 8px;
-      border-radius: 4px;
-      border: solid 1px #1d4cb1;
+      border: solid 1px var(--electric-blue);
       font-size: 14px;
       z-index: 1000;
       width: 250px;

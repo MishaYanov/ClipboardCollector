@@ -1,11 +1,13 @@
 <script lang="ts">
   import { onDestroy, onMount, tick } from "svelte";
-  import type { IRecord } from "../models/";
+  import { PopupToBackGroundMessageType, PortName, type IRecord } from "../models/";
   import Tooltip from "./Tooltip.svelte";
   import MdiDeleteAlertOutline from "./icons/MdiDeleteAlertOutline.svelte";
   import MdiClose from "./icons/MdiClose.svelte";
   import MdiCheck from "./icons/MdiCheck.svelte";
   import MdiContentCopy from "./icons/MdiContentCopy.svelte";
+  import Popup from "../pages/Popup.svelte";
+  import PortService from "../services/backgroundPortHandler";
 
   export let record: IRecord;
 
@@ -94,7 +96,13 @@
   };
 
   //TODO: add tooltip for the text
-  const deleteRecord = () => {};
+  const deleteRecord = () => {
+    const ps = PortService.getInstance(PortName.POPUP);
+    ps.sendMessage({
+      type: PopupToBackGroundMessageType.DELETE,
+      payload: { id: record.id },
+    });
+  };
 
   //TODO: add tooltip for the text
   const submitRecord = () => {};
@@ -122,7 +130,7 @@
     {#if isExpanded && !isEditing}
       {#if record.url}
         <div class="link" on:click={openLink}>
-          <p>Open the copy location</p>
+          <p>Navigate to URL</p>
         </div>
       {/if}
 
@@ -169,10 +177,10 @@
 
 <style>
   .copy-record {
-    height: 40px;
+    height: 60px;
     width: 280px;
     font-family: Arial, sans-serif;
-    border-left: 2px solid #2c58e9;
+    border-left: 2px solid var(--electric-blue);
     display: flex;
   }
   .copy-record-text {
@@ -200,10 +208,11 @@
   .expanded {
     min-height: 100px !important;
     height: fit-content !important;
-    border-color: green;
+    border-color: var(--cyber-lime);
     width: 280px;
   }
   .expanded .copy-record-text {
+    margin: 0.8rem 0;
     white-space: normal;
     justify-self: start;
     align-self: start;
@@ -214,6 +223,7 @@
     cursor: default;
   }
   .expanded p {
+    margin: .5rem 0;;
     max-width: 100%;
     white-space: normal;
     height: fit-content;
@@ -235,13 +245,13 @@
     padding: 0 10px;
   }
   .link {
-    color: white;
+    color: var(--cool-white);
     cursor: pointer;
     height: 24px;
-    margin-top: 5px;
+    padding: .5rem 0;
   }
   .link:hover {
-    color: #1d4cb1;
+    color: var(--cyber-lime);
   }
   .update-text {
     white-space: normal;

@@ -1,6 +1,9 @@
 import { getLast100Records } from "./database";
 import { sanitizeId } from "./utils";
 
+const menuPrefix = "clipboardContextMenu-";
+
+
 export function createClipboardContextMenuParent(){
     chrome.contextMenus.create(
       {
@@ -21,8 +24,9 @@ export function createClipboardContextMenuParent(){
 
 
 export async function createClipboardChildMenus() {
-    const options = await getRecords();
-  
+    // 
+    const options = [];
+    options.push(...(await getRecords()));
     if (options.length === 0) {
       options.push("No recent clipboard history");
     }

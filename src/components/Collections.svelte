@@ -51,7 +51,7 @@
   };
 
   //set active collection
-  const setActiveCollection = (collection: ICollection) => {
+  const setActiveCollection = (collection: ICollection): any => {
     ps.sendMessage({
       type: PopupToBackGroundMessageType.SET_ACTIVE_COLLECTION,
       payload: { id: collection.id },
@@ -156,7 +156,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    border-bottom: #2c58e9 solid 2px;
+    border-bottom: var(--electric-blue) solid 1px;
   }
   li {
     width: 140px;
@@ -186,7 +186,7 @@
     margin-left: 3px;
   }
   li:hover {
-    color: #2c58e9;
+    color: var(--electric-blue);
   }
   .active-collection-shortcut {
     display: flex;
@@ -196,7 +196,7 @@
     font-size: 1rem;
   }
   .active-collection-shortcut span {
-    color: green;
+    color: var(--neon-green);
     font-weight: 700;
   }
 </style>

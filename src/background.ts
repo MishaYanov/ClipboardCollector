@@ -6,41 +6,38 @@ import {
 import {
   addCopyRecord,
   getActiveCollectionId,
-  getLast100Records,
 } from "./background/database";
 import PortToPopup from "./background/portToPopup";
-import { clipboardWrite, decodeId, sanitizeId } from "./background/utils";
+import { clipboardWrite, decodeId } from "./background/utils";
+import { PortName } from "./models";
 
 // USE THIS TO PURGE THE DATABASE
 // clearAllData()
+const bp = PortToPopup.getInstance();
+
+chrome.runtime.onConnect.addListener((port) => {
+  try {
+    if (port.name !== PortName.POPUP) return;
+    console.log(`Connected to port: ${port.name}`);
+    bp.connect(port);
+  } catch (error) {
+    console.error("Error in onConnect:", error);
+  }
+});
+
 
 chrome.runtime.onInstalled.addListener((details) => {
   console.log("Extension installed:", details);
   chrome.runtime.onMessage.addListener(
     async (message, sender, sendResponse) => {
-      debugger;
       if (message.type === "copy") {
         await addCopyRecord(message.text, message.url, message.timestamp);
-        createClipboardChildMenus();
+        rebuildContextMenus();
         sendResponse({ status: "recorded" });
       }
     }
   );
-
-  const bp = PortToPopup.getInstance();
-
-  chrome.runtime.onConnect.addListener((port) => {
-    bp.connect(port);
-  });
-
-  createClipboardContextMenuParent();
-
-  //get active collection -> if exists, get all records -> create collection context menu
-  getActiveCollectionId().then((activeCollectionId) => {
-    if (activeCollectionId) {
-      createActiveCollectionContextMenuParent();
-    }
-  });
+  rebuildContextMenus();
 });
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
@@ -58,3 +55,11 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     clipboardWrite(text);
   }
 });
+
+
+function rebuildContextMenus() {
+  chrome.contextMenus.removeAll(() => {
+    createClipboardContextMenuParent();
+    createActiveCollectionContextMenuParent();
+  });
+}

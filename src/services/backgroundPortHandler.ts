@@ -4,11 +4,11 @@ class PortService{
     public static instance: PortService;
     private port: chrome.runtime.Port;
 
-    constructor(portNamae: PortName){
-        this.port = chrome.runtime.connect({name: portNamae});
+    constructor(portName: PortName) {
+        this.port = chrome.runtime.connect({ name: portName });
 
-        this.port.onMessage.addListener((message) => {
-            console.log('message received:', message);
+        this.port.onDisconnect.addListener((port) => {
+            console.log(`Port disconnected: ${port.name}`);
         });
     }
 

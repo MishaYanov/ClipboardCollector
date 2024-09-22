@@ -1,4 +1,40 @@
-html,
+:root {
+  /* ----------------------- */
+  /*       Primary Colors     */
+  /* ----------------------- */
+  --electric-blue: #0099CC;      /* Darker Blue */
+  --neon-green: #33CC66;         /* Softer Green */
+
+  /* ----------------------- */
+  /*      Secondary Colors    */
+  /* ----------------------- */
+  --deep-space-blue: #1A1A2E;    /* Darker Deep Space Blue */
+  --cyber-lime: #66CC99;         /* Muted Lime Green */
+
+  /* ----------------------- */
+  /*        Accent Colors     */
+  /* ----------------------- */
+  --laser-purple: #9933FF;       /* Rich Purple */
+  --vivid-teal: #00B3A4;         /* Teal with Reduced Brightness */
+
+  /* ----------------------- */
+  /*        Neutral Colors    */
+  /* ----------------------- */
+  --charcoal-black: #121212;
+  --slate-gray: #2F4F4F;
+  --slate-gray-50: #2F4F4F80;
+  --cool-white: #E0E0E0;
+  --silver: #C0C0C0;
+
+  /* ----------------------- */
+  /*       Highlight Colors   */
+  /* ----------------------- */
+  --electric-cyan: #00B3A4;      /* Reduced Brightness Cyan */
+  --bright-amber: #FFBF00;       /* Kept as is for contrast */
+}
+
+
+tml,
 body {
   width: 300px;
   height: 600px;
@@ -8,7 +44,9 @@ body {
 
 body {
   background-color: rgb(36, 36, 36);
-  color: white;
+  color: var(--cool-white);
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
 }
 
 code {
@@ -35,20 +73,19 @@ code {
 }
 
 .action:hover {
-  color: #1d4cb1;
+  color: var(--electric-blue);
 }
 
 button.main{
-  background-color: #1d4cb1;
-  color: white;
+  background-color: var(--electric-blue);
+  color: var(--cool-white);
   border: none;
   padding: 10px 20px;
-  border-radius: 5px;
   cursor: pointer;
 }
 
 button.main:hover{
-  background-color: #1d4cb1;
+  background-color: var(--deep-space-blue);
 }
 
 button.secondary{
@@ -56,10 +93,13 @@ button.secondary{
   color: white;
   border: none;
   padding: 10px 20px;
-  border-radius: 5px;
   cursor: pointer;
 }
 
 button.secondary:hover{
   background-color: #ffffff44;
+}
+
+.record-list .copy-record:nth-of-type(odd) {
+  background-color: var(--charcoal-black);
 }
