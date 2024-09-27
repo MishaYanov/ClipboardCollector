@@ -1,32 +1,22 @@
 import { createActiveCollectionContextMenuParent } from "./background/activeCollectionContextMenu";
-import {
-  createClipboardContextMenuParent,
-} from "./background/clipboardContextMenu";
-import {
-  addCopyRecord,
-} from "./background/database";
-import PortToPopup from "./background/portToPopup";
+import { createClipboardContextMenuParent } from "./background/clipboardContextMenu";
+import { addCopyRecord } from "./background/database";
+import MessageHandler from "./background/MessageHandler";
 import { clipboardWrite, decodeId } from "./background/utils";
-import { PortName } from "./models";
 
 // USE THIS TO PURGE THE DATABASE
 // clearAllData()
 
-
-const bp = PortToPopup.getInstance();
+const bp = MessageHandler.getInstance();
 
 chrome.runtime.onConnect.addListener((port) => {
-  try {
-    if (port.name !== PortName.POPUP) return;
-    console.log(`Connected to port: ${port.name}`);
-    bp.connect(port);
-  } catch (error) {
-    console.error("Error in onConnect:", error);
-  }
+  const mh = MessageHandler.getInstance();
 });
 
-
 chrome.runtime.onInstalled.addListener((details) => {
+  rebuildContextMenus();
+
+
   console.log("Extension installed:", details);
   chrome.runtime.onMessage.addListener(
     async (message, sender, sendResponse) => {
@@ -37,7 +27,6 @@ chrome.runtime.onInstalled.addListener((details) => {
       }
     }
   );
-  rebuildContextMenus();
 });
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
@@ -55,7 +44,6 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     clipboardWrite(text);
   }
 });
-
 
 function rebuildContextMenus() {
   chrome.contextMenus.removeAll(() => {

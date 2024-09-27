@@ -1,8 +1,7 @@
 <script lang="ts">
-  import { onDestroy, onMount } from "svelte";
+  import { onMount } from "svelte";
   import { PopupToBackGroundMessageType } from "../models/PopupToBackGroundMessageTypes";
-  import { PortName } from "../models/PortName";
-  import PortService from "../services/backgroundPortHandler";
+  import MessageService from "../services/MessageService";
   import CollectionInstance from "./collections/CollectionInstance.svelte";
   import CreateCollection from "./collections/CreateCollection.svelte";
   import type { ICollection, IPopupMessage } from "../models";
@@ -10,73 +9,141 @@
 
   export let activeTab: string;
 
-  let ps: PortService;
   let collections: ICollection[] | null = null;
-  // collection manager state
 
+  // Collection manager state
   let activeCollection: ICollection | null = null;
   let chosenCollection: ICollection | null = null;
   let isCreatingCollection = false;
+  let first = true;
+  const messageService = MessageService.getInstance();
 
   onMount(() => {
-    ps = PortService.getInstance(PortName.POPUP);
-    // listen for messages from background
-    ps.onMessage((message: IPopupMessage) => {
+    messageService.onMessage((message: IPopupMessage) => {
       if (message.type === PopupToBackGroundMessageType.GET_ALL_COLLECTIONS) {
         console.log(message);
         if (message.collections) collections = message.collections;
       }
       if (message.type === PopupToBackGroundMessageType.GET_ACTIVE_COLLECTION) {
-        const activeCollectionId = message.payload?.id;
-        if (activeCollectionId) {
-          activeCollection =
-            collections?.find((c) => c.id === activeCollectionId) || null;
-        }
+        findActiveCollection(message);
       }
     });
   });
 
-  $: if (activeTab === "collections") {
-    ps.sendMessage({ type: PopupToBackGroundMessageType.GET_ALL_COLLECTIONS });
-    ps.sendMessage({
-      type: PopupToBackGroundMessageType.GET_ACTIVE_COLLECTION,
-    });
+  $: if (activeTab === "collections" && first) {
+    first = false;
+    getAllCollections();
+    getActiveCollection();
   } else {
     handleClose();
   }
 
-  //create new collection
+  const getAllCollections = async () => {
+    messageService.sendMessage(
+      {
+        type: PopupToBackGroundMessageType.GET_ALL_COLLECTIONS,
+      },
+      (response) => {
+        if (
+          response &&
+          response.type === PopupToBackGroundMessageType.GET_ALL_COLLECTIONS
+        ) {
+          collections = response.collections;
+        }
+      }
+    );
+  };
+
+  const getActiveCollection = async () => {
+    messageService.sendMessage(
+      {
+        type: PopupToBackGroundMessageType.GET_ACTIVE_COLLECTION,
+      },
+      (response) => {
+        if (
+          response &&
+          response.type === PopupToBackGroundMessageType.GET_ACTIVE_COLLECTION
+        ) {
+          const activeCollectionId = response.payload?.id;
+          if (activeCollectionId) {
+            activeCollection =
+              collections?.find((c) => c.id === activeCollectionId) || null;
+          } else {
+            activeCollection = null;
+          }
+        }
+      }
+    );
+  };
+
+  const findActiveCollection = async (message: IPopupMessage) => {
+    const activeCollectionId = message.payload?.id;
+    if (activeCollectionId) {
+      activeCollection =
+        collections?.find((c) => c.id === activeCollectionId) || null;
+    } else {
+      activeCollection = null;
+    }
+  };
+
   const createCollection = () => {
     isCreatingCollection = true;
   };
 
-  //set active collection
-  const setActiveCollection = (collection: ICollection): any => {
-    ps.sendMessage({
-      type: PopupToBackGroundMessageType.SET_ACTIVE_COLLECTION,
-      payload: { id: collection.id },
-    });
-    activeCollection = collection;
+  const setActiveCollection = (collection: ICollection): void => {
+    messageService.sendMessage(
+      {
+        type: PopupToBackGroundMessageType.SET_ACTIVE_COLLECTION,
+        payload: { id: collection.id },
+      },
+      (response) => {
+        if (
+          response &&
+          response.type === PopupToBackGroundMessageType.GET_ACTIVE_COLLECTION
+        ) {
+          activeCollection = collection;
+        }
+      }
+    );
   };
 
-  //remove active collection
   const removeActiveCollection = () => {
     if (activeCollection === null) return;
-    ps.sendMessage({
-      type: PopupToBackGroundMessageType.SET_ACTIVE_COLLECTION,
-      payload: { id: null },
-    });
-    activeCollection = null;
+    messageService.sendMessage(
+      {
+        type: PopupToBackGroundMessageType.SET_ACTIVE_COLLECTION,
+        payload: { id: null },
+      },
+      (response) => {
+        if (
+          response &&
+          response.type === PopupToBackGroundMessageType.GET_ACTIVE_COLLECTION
+        ) {
+          activeCollection = null;
+        }
+      }
+    );
   };
 
   const openCollection = (collection: ICollection) => {
     chosenCollection = collection;
   };
 
-  //events
-  const handleClose = () => {
+  // Events
+  const handleClose = (event?: Event) => {
+    if ((event as CustomEvent)?.detail?.collectionId == activeCollection?.id) {
+      activeCollection = null;
+    }
     isCreatingCollection = false;
     chosenCollection = null;
+    first = true;
+  };
+
+  const handleCloseAndRefresh = () => {
+    isCreatingCollection = false;
+    chosenCollection = null;
+    first = true;
+    getAllCollections();
   };
 
   const handleActiveCollectionSet = (collection: ICollection) => {
@@ -91,7 +158,7 @@
 <section class="collection-manager">
   {#if isCreatingCollection}
     <CreateCollection
-      on:collectionCreated={handleClose}
+      on:collectionCreated={handleCloseAndRefresh}
       on:close={handleClose}
     />
   {:else}
@@ -101,7 +168,9 @@
     </ul>
     {#if activeCollection && !chosenCollection}
       <div class="active-collection-shortcut">
-        <p>Active Collection: <span>{activeCollection.name}</span></p>
+        <p>
+          Active Collection: <span>{activeCollection.name}</span>
+        </p>
         <a class="action" on:click={removeActiveCollection}>
           <MdiClose class="icon" />
         </a>
@@ -127,12 +196,14 @@
           <p>No collections found.</p>
         {/if}
       </div>
-    {:else if chosenCollection}
+    {:else if chosenCollection !== null}
       <CollectionInstance
         collection={chosenCollection}
         isActive={activeCollection?.id === chosenCollection?.id}
         on:close={handleClose}
-        on:setActive={setActiveCollection(chosenCollection)}
+        on:setActive={() => {
+          if (chosenCollection) setActiveCollection(chosenCollection);
+        }}
       />
     {/if}
   {/if}

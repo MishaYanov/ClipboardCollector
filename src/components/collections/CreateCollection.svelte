@@ -1,12 +1,12 @@
 <script lang="ts">
-  import PortService from "../../services/backgroundPortHandler";
-  import { PortName, PopupToBackGroundMessageType } from "../../models";
+  import { PopupToBackGroundMessageType } from "../../models";
   import { generateTimestamp } from "../../utils";
   import { createEventDispatcher } from "svelte";
+  import MessageService from "../../services/MessageService";
 
   const dispatch = createEventDispatcher();
 
-  const bp = PortService.getInstance(PortName.POPUP);
+  const bp = MessageService.getInstance()
 
   let collectionName: string = "";
 

@@ -1,4 +1,3 @@
-<!-- RecordItem.svelte -->
 <script lang="ts">
   import { createEventDispatcher, onDestroy, onMount, tick } from "svelte";
   import type { ICollectionRecord } from "../../models";

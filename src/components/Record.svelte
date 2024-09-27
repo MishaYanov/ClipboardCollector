@@ -6,8 +6,7 @@
   import MdiClose from "./icons/MdiClose.svelte";
   import MdiCheck from "./icons/MdiCheck.svelte";
   import MdiContentCopy from "./icons/MdiContentCopy.svelte";
-  import Popup from "../pages/Popup.svelte";
-  import PortService from "../services/backgroundPortHandler";
+  import MessageService from "../services/MessageService";
 
   export let record: IRecord;
 
@@ -97,10 +96,10 @@
 
   //TODO: add tooltip for the text
   const deleteRecord = () => {
-    const ps = PortService.getInstance(PortName.POPUP);
-    ps.sendMessage({
-      type: PopupToBackGroundMessageType.DELETE,
-      payload: { id: record.id },
+    const messageService = MessageService.getInstance()
+    messageService.sendMessage({
+      type: PopupToBackGroundMessageType.DELETE_COLLECTION_RECORD,
+      payload: { recordId: record.id },
     });
   };
 

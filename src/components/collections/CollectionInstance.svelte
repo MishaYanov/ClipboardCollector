@@ -1,6 +1,5 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from "svelte";
-  import PortService from "../../services/backgroundPortHandler";
   import {
     PortName,
     PopupToBackGroundMessageType,
@@ -9,6 +8,7 @@
   } from "../../models";
   import NewCollectionRecord from "./NewCollectionRecord.svelte";
   import CollectionRecord from "./CollectionRecord.svelte";
+  import MessageService from "../../services/MessageService";
 
   // Props
   export let collection: ICollection;
@@ -17,8 +17,7 @@
   // Dispatcher for events
   const dispatch = createEventDispatcher();
 
-  // Port for communication
-  const ps = PortService.getInstance(PortName.POPUP);
+  const messageService = MessageService.getInstance();
 
   // State variables
   let records: ICollectionRecord[] | null = null;
@@ -30,7 +29,7 @@
   // Fetch records on mount
   onMount(() => {
     getCollectionRecords();
-    ps.onMessage(handleMessages);
+    messageService.onMessage(handleMessages);
   });
 
   const handleMessages = (message: any) => {
@@ -70,12 +69,18 @@
 
   // Fetch records for the current collection
   const getCollectionRecords = () => {
-    console.log(collection.id);
     loadingRecords = true;
-    ps.sendMessage({
-      type: PopupToBackGroundMessageType.GET_COLLECTION_RECORDS,
-      payload: { collectionId: collection.id },
-    });
+    debugger;
+    messageService.sendMessage(
+      {
+        type: PopupToBackGroundMessageType.GET_COLLECTION_RECORDS,
+        payload: { collectionId: collection.id },
+      },
+      (response) => {
+        records = response.payload.collectionRecords;
+        loadingRecords = false;
+      }
+    );
   };
 
   // Handle adding a new record (show the form)
@@ -95,32 +100,41 @@
         `Are you sure you want to delete collection "${collection.name}"?`
       )
     ) {
-      ps.sendMessage({
+      messageService.sendMessage({
         type: PopupToBackGroundMessageType.DELETE_COLLECTION,
         payload: { collectionId: collection.id },
       });
-      // The background script will handle deletion and notify via message
+      returnToCollectionList();
     }
-    returnToCollectionList();
   };
 
-  const deleteAndRefetch = (event:any) => {
-    ps.sendMessage({
-      type: PopupToBackGroundMessageType.DELETE_COLLECTION_RECORD,
-      payload: {
-        collectionRecordId: event.detail.recordId 
+  const deleteAndRefetch = (event: any) => {
+    debugger;
+    messageService.sendMessage(
+      {
+        type: PopupToBackGroundMessageType.DELETE_COLLECTION_RECORD,
+        payload: {
+          collectionRecordId: event.detail.recordId,
+        },
       },
-    });
-    getCollectionRecords();
+      (response) => {
+        if (
+          response.type ===
+          PopupToBackGroundMessageType.COLLECTION_RECORD_DELETED
+        ) {
+          getCollectionRecords();
+        }
+      }
+    );
   };
-
 
   const returnToCollectionList = () => {
-    dispatch("close");
+    dispatch("close", { collectionId: collection.id });
   };
 
   const handleRecordAdded = () => {
     showingAddRecordForm = false;
+    getCollectionRecords();
   };
 
   const handleCancelAddRecord = () => {
@@ -161,10 +175,7 @@
       <p>Loading records...</p>
     {:else if records.length > 0}
       {#each records as record}
-        <CollectionRecord 
-        {record} 
-        on:delete={deleteAndRefetch}
-        />
+        <CollectionRecord {record} on:delete={deleteAndRefetch} />
       {/each}
     {:else}
       <p>No records in this collection.</p>

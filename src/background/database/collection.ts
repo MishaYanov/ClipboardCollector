@@ -109,7 +109,7 @@ export async function addCollectionRecord(
     const request = store.add(record);
 
     request.onsuccess = () => {
-      resolve(id);
+      resolve(collectionId);
     };
 
     request.onerror = () => {
