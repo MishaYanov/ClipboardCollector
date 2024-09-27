@@ -32,7 +32,7 @@ export async function deleteCopyRecord(id: string): Promise<void> {
   store.delete(id);
 
   transaction.oncomplete = () => {
-    console.log("Record deleted");
+    return;
   };
 
   transaction.onerror = () => {

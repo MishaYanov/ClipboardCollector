@@ -2,7 +2,6 @@
 export async function clipboardWrite(text: string) {
     try {
       await navigator.clipboard.writeText(text);
-      console.log("Text written to clipboard:", text);
     } catch (error) {
       console.error("Failed to write to clipboard:", error);
     }
@@ -18,8 +17,6 @@ export async function clipboardWrite(text: string) {
               "Error sending message to content script:",
               chrome.runtime.lastError
             );
-          } else {
-            console.log("Pasted text into the page:", response?.status);
           }
         }
       );

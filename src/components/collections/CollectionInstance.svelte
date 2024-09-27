@@ -70,7 +70,6 @@
   // Fetch records for the current collection
   const getCollectionRecords = () => {
     loadingRecords = true;
-    debugger;
     messageService.sendMessage(
       {
         type: PopupToBackGroundMessageType.GET_COLLECTION_RECORDS,
@@ -109,7 +108,6 @@
   };
 
   const deleteAndRefetch = (event: any) => {
-    debugger;
     messageService.sendMessage(
       {
         type: PopupToBackGroundMessageType.DELETE_COLLECTION_RECORD,

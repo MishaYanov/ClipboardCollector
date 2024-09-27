@@ -15,7 +15,6 @@ export function createClipboardContextMenuParent(){
         if (chrome.runtime.lastError) {
           console.error("Error creating context menu:", chrome.runtime.lastError);
         } else {
-          console.log("Clipboard Manager context menu created successfully.");
           createClipboardChildMenus();
         }
       }
@@ -44,9 +43,7 @@ export async function createClipboardChildMenus() {
               `Error creating child context menu '${option}':`,
               chrome.runtime.lastError
             );
-          } else {
-            console.log(`Child context menu '${option}' created successfully.`);
-          }
+          } 
         }
       );
     });

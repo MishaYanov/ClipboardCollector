@@ -21,7 +21,6 @@
   onMount(() => {
     messageService.onMessage((message: IPopupMessage) => {
       if (message.type === PopupToBackGroundMessageType.GET_ALL_COLLECTIONS) {
-        console.log(message);
         if (message.collections) collections = message.collections;
       }
       if (message.type === PopupToBackGroundMessageType.GET_ACTIVE_COLLECTION) {
@@ -144,10 +143,6 @@
     chosenCollection = null;
     first = true;
     getAllCollections();
-  };
-
-  const handleActiveCollectionSet = (collection: ICollection) => {
-    setActiveCollection(collection);
   };
 </script>
 

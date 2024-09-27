@@ -18,7 +18,6 @@
   const getRecords = async (msg:IPopupMessage) => {
     messageService.sendMessage(message, (response) => {
       if (response && response.type === PopupToBackGroundMessageType.GET_ALL) {
-        console.log(response);
         records = response.records;
       }
     });

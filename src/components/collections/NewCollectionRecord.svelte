@@ -54,7 +54,6 @@
           response &&
           response.type === PopupToBackGroundMessageType.COLLECTION_RECORD_ADDED
         ) {
-          debugger
           if (response.payload?.collectionId === collection.id) {
             successMessage = 'Record added successfully!';
             recordText = '';

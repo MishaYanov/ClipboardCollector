@@ -16,8 +16,6 @@ chrome.runtime.onConnect.addListener((port) => {
 chrome.runtime.onInstalled.addListener((details) => {
   rebuildContextMenus();
 
-
-  console.log("Extension installed:", details);
   chrome.runtime.onMessage.addListener(
     async (message, sender, sendResponse) => {
       if (message.type === "copy") {
