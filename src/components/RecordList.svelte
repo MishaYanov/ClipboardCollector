@@ -15,7 +15,7 @@
     payload: "Hello from the popup!",
   };
 
-  const getRecords = async (msg:IPopupMessage) => {
+  const getRecords = async () => {
     messageService.sendMessage(message, (response) => {
       if (response && response.type === PopupToBackGroundMessageType.GET_ALL) {
         records = response.records;
@@ -24,7 +24,7 @@
   }
 
   $: if (activeTab === "clipboard") {
-    getRecords(message);
+    getRecords();
   }
 </script>
 
@@ -33,7 +33,7 @@
     <p>Loading records...</p>
   {:else if records.length > 0}
     {#each records as record (record.id)}
-      <Record {record} />
+      <Record {record} on:recordDeleted={getRecords}/>
     {/each}
   {:else}
     <p>No records found.</p>

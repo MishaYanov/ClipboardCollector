@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onDestroy, onMount, tick } from "svelte";
+  import { createEventDispatcher, onDestroy, onMount, tick } from "svelte";
   import { PopupToBackGroundMessageType, PortName, type IRecord } from "../models/";
   import Tooltip from "./Tooltip.svelte";
   import MdiDeleteAlertOutline from "./icons/MdiDeleteAlertOutline.svelte";
@@ -7,6 +7,8 @@
   import MdiCheck from "./icons/MdiCheck.svelte";
   import MdiContentCopy from "./icons/MdiContentCopy.svelte";
   import MessageService from "../services/MessageService";
+
+  const dispatch = createEventDispatcher();
 
   export let record: IRecord;
 
@@ -96,10 +98,15 @@
 
   //TODO: add tooltip for the text
   const deleteRecord = () => {
+    debugger
     const messageService = MessageService.getInstance()
     messageService.sendMessage({
-      type: PopupToBackGroundMessageType.DELETE_COLLECTION_RECORD,
-      payload: { recordId: record.id },
+      type: PopupToBackGroundMessageType.DELETE,
+      payload: { id: record.id },
+    }, (response) => {
+      if (response?.type === PopupToBackGroundMessageType.COPY_RECORD_DELETED) {
+        dispatch("recordDeleted");
+      };
     });
   };
 

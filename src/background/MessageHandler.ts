@@ -47,6 +47,7 @@ class MessageHandler {
     sender: chrome.runtime.MessageSender,
     sendResponse: (response: any) => void
   ) {
+    debugger
     switch (message.type) {
       case PopupToBackGroundMessageType.GREET:
         getLast100Records().then((records) => {
@@ -58,14 +59,14 @@ class MessageHandler {
         break;
 
       case PopupToBackGroundMessageType.DELETE:
+        debugger
         const recordId = message.payload.id;
         deleteCopyRecord(recordId)
-          .then(() => getLast100Records())
-          .then((records) => {
+          .then(() => {
             sendResponse({
-              type: PopupToBackGroundMessageType.GET_ALL,
-              records,
+              type: PopupToBackGroundMessageType.COPY_RECORD_DELETED,
             });
+            
           })
           .catch((error) => {
             console.error("Failed to delete record:", error);
